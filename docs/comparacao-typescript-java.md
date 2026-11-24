@@ -38,6 +38,8 @@ Documento vivo: cresce a cada bloco do projeto. Para cada tema, o que se faz em 
 |---|---|---|---|
 | Biblioteca | Playwright (`APIRequestContext`) | **REST Assured** | O REST Assured é a biblioteca de referência para testar APIs em Java, e escreve-se como o Gherkin: `given().when().get(...).then()`. |
 | Endereço base | `baseURL` na configuração | `RestAssured.baseURI = "..."`, num hook `@Before` | Escreve-se uma só vez; os passos usam só o caminho (`/brands`). |
+| Olhar para dentro do JSON | `const corpo = await resposta.json()` e depois `corpo.data`, `corpo.data.map(p => p.name)` | `.body("data.name", ...)` | No REST Assured, o caminho (`"data.name"`) faz o trabalho do `map`: "entra em cada produto e tira-lhe o `name`". |
+| Verificar valores | `expect(...).toEqual(expect.objectContaining({ price: expect.any(Number) }))` | Matchers **Hamcrest**: `everyItem(instanceOf(Number.class))`, `not(empty())` | São frases quase em inglês, e a mensagem de falha escreve-se sozinha ("Expected: every item is an instance of String / Actual: [14.15, ...]"). |
 | Endereço configurável | Variável de ambiente lida com `process.env` | `System.getenv().getOrDefault("TOOLSHOP_API_URL", "http://localhost:8091")` | A mesma ideia: o endereço vive **fora do código**. O `getOrDefault` dá um valor por omissão quando a variável não existe. |
 | Verificar o status | `expect(resposta.status()).toBe(200)` | `resposta.then().statusCode(200)` | No REST Assured, a verificação faz parte da "frase" da resposta. |
 
