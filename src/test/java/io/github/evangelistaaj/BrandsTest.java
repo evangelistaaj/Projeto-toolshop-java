@@ -1,16 +1,23 @@
 package io.github.evangelistaaj;
 
+import io.restassured.RestAssured;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 
 public class BrandsTest {
 
+    @BeforeAll
+    static void configurarApi() {
+        RestAssured.baseURI = "https://api.practicesoftwaretesting.com";
+    }
+
     @Test
     void listarMarcasDevolveStatus200() {
         given()
                 .when()
-                .get("https://api.practicesoftwaretesting.com/brands")
+                .get("/brands")
                 .then()
                 .statusCode(200);
     }
@@ -19,7 +26,7 @@ public class BrandsTest {
     void pedirMarcaInexistenteDevolveStatus404() {
         given()
                 .when()
-                .get("https://api.practicesoftwaretesting.com/brands/marca-que-nao-existe")
+                .get("/marca-que-nao-existe")
                 .then()
                 .statusCode(404);
     }
