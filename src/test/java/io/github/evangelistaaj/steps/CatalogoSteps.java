@@ -30,4 +30,20 @@ public class CatalogoSteps {
             .body("data.price", everyItem(instanceOf(Number.class)))
             .body("data.in_stock", everyItem(instanceOf(Boolean.class)));
     }
+
+    @Quando("consulto a página {int} do catálogo")
+    public void consultoAPaginaDoCatalogo(int numero) {
+        contexto.resposta = given().queryParam("page", numero).when().get("/products");
+    }
+
+    @Então("a página {int} tem {int} produtos, do {int}.º ao {int}.º")
+    public void aPaginaTemProdutos(int numero, int quantidade, int primeiro, int ultimo) {
+        contexto.resposta.then()
+            .statusCode(200)
+            .body("current_page", equalTo(numero))
+            .body("per_page", equalTo(quantidade))
+            .body("data", hasSize(quantidade))
+            .body("from", equalTo(primeiro))
+            .body("to", equalTo(ultimo));
+    }
 }
