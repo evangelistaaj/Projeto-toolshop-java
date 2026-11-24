@@ -10,8 +10,8 @@ Funcionalidade: Marcas
 
     Cenário: Listar todas as marcas
       Quando peço a lista de marcas
-      Então a resposta tem o status 200
+      Então recebo uma resposta com o código 200
 
     Cenário: Pedir uma marca que não existe
       Quando peço a marca com o id "marca-que-nao-existe"
-      Então a resposta tem o status 404
+      Então recebo uma resposta com o código 404
