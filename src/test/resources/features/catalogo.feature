@@ -17,3 +17,7 @@ Funcionalidade: Catálogo de produtos
     Cenário: A segunda página continua onde a primeira acabou
       Quando consulto a página 2 do catálogo
       Então a página 2 tem 9 produtos, do 10.º ao 18.º
+
+    Cenário: Uma página depois da última vem vazia
+      Quando consulto a página a seguir à última do catálogo
+      Então a página vem vazia

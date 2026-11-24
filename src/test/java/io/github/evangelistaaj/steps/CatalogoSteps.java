@@ -46,4 +46,23 @@ public class CatalogoSteps {
             .body("from", equalTo(primeiro))
             .body("to", equalTo(ultimo));
     }
+
+    @Quando("consulto a página a seguir à última do catálogo")
+    public void consultoAPaginaASeguirAUltima() {
+        int ultima = given().when().get("/products")
+            .then().statusCode(200)
+            .extract().path("last_page");
+        contexto.resposta = given().queryParam("page", ultima + 1).when().get("/products");
+    }
+
+    @Então("a página vem vazia")
+    public void aPaginaVemVazia() {
+        int ultima = contexto.resposta.path("last_page");
+        contexto.resposta.then()
+            .statusCode(200)
+            .body("current_page", equalTo(ultima + 1))
+            .body("data", empty())
+            .body("from", nullValue())
+            .body("to", nullValue());
+    }
 }
