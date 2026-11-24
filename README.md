@@ -14,11 +14,11 @@
 
 Este é o **terceiro projeto** do meu portfolio de automação de testes. A aplicação é a mesma dos anteriores, mas a stack muda:
 
-| # | Projeto | Stack |
+| Projeto | O que testa | Stack |
 |---|---|---|
-| 1 | [Projeto-toolshop](https://github.com/evangelistaaj/Projeto-toolshop) (UI) | Playwright + playwright-bdd + TypeScript |
-| 2 | [Projeto-toolshop-api](https://github.com/evangelistaaj/Projeto-toolshop-api) (API) | Cucumber + Playwright + TypeScript |
-| **3** | **Projeto-toolshop-java (API)** | **Java + REST Assured + Cucumber-JVM + JUnit** |
+| [Projeto-toolshop](https://github.com/evangelistaaj/Projeto-toolshop) | Interface (E2E) | Playwright + playwright-bdd |
+| [Projeto-toolshop-api](https://github.com/evangelistaaj/Projeto-toolshop-api) | API REST | Playwright (`APIRequestContext`) + Cucumber |
+| **Projeto-toolshop-java** (este) | API REST | Java + REST Assured + Cucumber-JVM + JUnit |
 
 **Porquê o mesmo sistema outra vez?** Porque eu já conheço o domínio de trás para a frente: marcas, produtos, utilizadores, login… Assim, toda a energia vai para aprender a stack que o mercado mais pede em Portugal para *Automation Tester*: **Java + REST Assured + Cucumber**.
 
