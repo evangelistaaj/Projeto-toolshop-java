@@ -31,7 +31,7 @@ E, desta vez, **o código é escrito por mim, linha a linha**. 💪
 | Ferramenta | Versão | Para quê |
 |---|---|---|
 | ☕ Java (Eclipse Temurin) | 21 (LTS) | linguagem |
-| 📦 Maven | (incluído no IntelliJ) | dependências e build |
+| 📦 Maven | via Maven Wrapper (`mvnw`) | dependências, build e execução no terminal |
 | 🌐 REST Assured | 6.3.0 | pedidos HTTP e verificações (`given / when / then`) |
 | 🥒 Cucumber-JVM | 8.0.2 | cenários em Gherkin, em português |
 | ✅ JUnit Platform | 6.1.3 | motor de execução dos testes |
@@ -51,8 +51,13 @@ E, desta vez, **o código é escrito por mim, linha a linha**. 💪
    ```
 2. Abrir a pasta no IntelliJ e deixar o Maven descarregar as dependências.
 3. Correr os cenários, de uma destas formas:
-   - **Todos:** ▶️ ao lado de `ExecutarCucumberTest` (o runner).
-   - **Uma funcionalidade ou um cenário:** ▶️ dentro do ficheiro `.feature`.
+   - **No IntelliJ, todos:** ▶️ ao lado de `ExecutarCucumberTest` (o runner).
+   - **No IntelliJ, uma funcionalidade ou um cenário:** ▶️ dentro do ficheiro `.feature`.
+   - **No terminal** (sem IntelliJ, como na CI), com o Maven Wrapper, que descarrega a versão certa do Maven na primeira vez:
+     ```powershell
+     .\mvnw.cmd test     # Windows
+     ./mvnw test          # Linux e macOS
+     ```
 
 ### 🐳 Onde correm os testes
 
@@ -187,7 +192,7 @@ Projeto-toolshop-java/
 - [ ] Testes unitários das funções de oráculo
 - [x] Testes a correr na Toolshop local (Docker), com o endereço configurável (`TOOLSHOP_API_URL`)
 - [ ] Relatório HTML do Cucumber
-- [ ] Correr os testes pela linha de comandos (`mvn test`), com o Maven Wrapper (`mvnw`)
+- [x] Correr os testes pela linha de comandos, com o Maven Wrapper (`mvnw test`)
 - [ ] CI no GitHub Actions: a Toolshop em Docker na própria máquina da CI (a API fica em `localhost:8091`, por isso o endereço por omissão serve sem mudanças), Java 21 e o relatório no GitHub Pages
 
 ---

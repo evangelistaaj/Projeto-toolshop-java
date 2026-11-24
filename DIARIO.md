@@ -50,3 +50,33 @@ Uma entrada por sessão: o que se fez, o conceito novo, o bug (ou susto) mais in
 
 **Frase para o LinkedIn**
 > "Hoje o meu teste passou… pela razão errada. 😅 Foi aí que percebi porque é que, antes de confiar num verde, eu sabotei o meu próprio teste. Se ele não ficar vermelho quando eu o estrago, não está a testar nada."
+
+### 2026-11-24 (tarde) — o restaurante, o Docker e o catálogo
+
+**O que fiz**
+- Separei os passos comuns: `ComumSteps` (o `Então recebo uma resposta com o código {int}`, a mesma frase do projeto 2), `Hooks` e a classe `Contexto`, partilhada pelo PicoContainer.
+- Explorei o `GET /products` no Swagger antes de automatizar (só GETs).
+- Pus o projeto a correr na Toolshop local (Docker) por omissão, com o endereço configurável pela variável `TOOLSHOP_API_URL`.
+- Comecei o catálogo: ✅ "Consultar o catálogo", ✅ "A segunda página continua onde a primeira acabou" e ✅ "Uma página depois da última vem vazia". Cada um com OK e Sabotagem.
+- Criei o `docs/comparacao-typescript-java.md`: o que muda do projeto 2 para o 3, e porquê, com uma secção de analogias.
+
+**Conceitos novos**
+- **Injeção de dependências** (PicoContainer) e **construtor**, explicados com o restaurante 🍽️: cada cenário é uma mesa; o cozinheiro (`MarcasSteps`, `CatalogoSteps`) pousa o prato (a resposta) no balcão (`Contexto`); o empregado (`ComumSteps`) confere-o; o gerente (PicoContainer) monta um balcão novo para cada mesa; o construtor é a entrada ao serviço.
+- **`null` e `NullPointerException`**: ir conferir um prato que não está lá.
+- **Variáveis de ambiente**: `System.getenv().getOrDefault(...)`, o endereço fora do código.
+- **Três erros de ambiente** 📞: `UnknownHostException` (o número não existe), `Connection refused` (o telefone está desligado), `AssertionError` (atenderam, mas a resposta não era a esperada).
+- **Olhar para dentro do JSON**: `.body("data.name", ...)` com matchers Hamcrest (`not(empty())`, `everyItem(instanceOf(...))`, `equalTo`, `hasSize`, `nullValue`); `queryParam`; `.extract().path(...)` para guardar um valor numa variável.
+- **Headers da resposta**: `cache-control`, `etag`, CORS (`access-control-allow-origin: *`).
+- **Comum ou da funcionalidade?** "Esta frase faria sentido noutro `.feature`?"
+- **camelCase** 🐪: o nome do método é para as pessoas (aparece nos erros); o Cucumber usa o texto da anotação.
+
+**O mais interessante**
+- Duas descobertas na exploração: o catálogo público passou de **50 para 141 e depois para 150 produtos em poucos minutos** (ambiente partilhado), e o **Swagger aberto no `localhost` enviava os pedidos para o servidor público**. Só dei por isso porque li o *Request URL*.
+
+**Frase para o LinkedIn**
+> "Abri o Swagger no meu `localhost`, carreguei em Execute… e o pedido foi para o servidor público. 🤯 O 'Request URL' estava ali o tempo todo. Lição do dia: um QA não lê só a resposta, lê também a pergunta."
+
+**Pendências para a próxima sessão**
+- 🧰 Catálogo: percorrer todas as páginas (cada produto uma só vez), pesquisa, filtros e ordenação (os oráculos "a sério", comparados com o catálogo completo).
+- 🔧 Maven Wrapper (`mvnw`) e `mvn test`, a preparar a CI.
+- ❓ Em aberto desde a sessão 1: porque é que o `Hello and welcome!` ficou colado ao `i = 1`? (`print` vs `println`)
