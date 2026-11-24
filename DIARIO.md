@@ -76,7 +76,14 @@ Uma entrada por sessão: o que se fez, o conceito novo, o bug (ou susto) mais in
 **Frase para o LinkedIn**
 > "Abri o Swagger no meu `localhost`, carreguei em Execute… e o pedido foi para o servidor público. 🤯 O 'Request URL' estava ali o tempo todo. Lição do dia: um QA não lê só a resposta, lê também a pergunta."
 
+**Fim do dia: os testes no terminal 💻**
+- Criei o **Maven Wrapper** (`mvnw` e `mvnw.cmd`): um script dentro do projeto que descarrega a versão certa do Maven. Agora os testes correm sem o IntelliJ: `.\mvnw.cmd test` → `Tests run: 5` e `BUILD SUCCESS` ✅.
+- Sabotagem com a variável de ambiente (`TOOLSHOP_API_URL=http://localhost:9999`) → `BUILD FAILURE` com `Failures: 0, Errors: 5`. O Maven separa as **falhas** (a verificação falhou) dos **erros** (nem se chegou a verificar, ou seja, o ambiente). Só de olhar para esse número sei onde procurar.
+- O `mvnw.cmd` (Windows) tem de ficar em **CRLF**, por isso abri uma exceção no `.gitattributes` e no `.editorconfig`.
+- Marquei o `mvnw` como **executável** (`git update-index --chmod=+x mvnw`, `100644 → 100755`). Sem isso, a CI em Linux dava `Permission denied`.
+- 🕵️ **Mistério da sessão 1 resolvido:** o `Hello and welcome!` ficou colado ao `i = 1` porque o `print` escreve e fica na mesma linha, enquanto o `println` muda de linha no fim (*line*).
+
 **Pendências para a próxima sessão**
 - 🧰 Catálogo: percorrer todas as páginas (cada produto uma só vez), pesquisa, filtros e ordenação (os oráculos "a sério", comparados com o catálogo completo).
-- 🔧 Maven Wrapper (`mvnw`) e `mvn test`, a preparar a CI.
-- ❓ Em aberto desde a sessão 1: porque é que o `Hello and welcome!` ficou colado ao `i = 1`? (`print` vs `println`)
+- ☁️ CI no GitHub Actions, quando houver mais cenários (o Maven Wrapper já está pronto).
+- 🔣 No terminal do Windows, o `✽` das mensagens do Cucumber aparece como `?` (só cosmético; ver com a CI).
