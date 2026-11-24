@@ -41,7 +41,9 @@ E, desta vez, **o código é escrito por mim, linha a linha**. 💪
 
 ## ▶️ Como executar
 
-**Pré-requisitos:** IntelliJ IDEA com o plugin **Cucumber for Java**. O próprio IntelliJ descarrega o JDK 21 e já traz o Maven.
+**Pré-requisitos:**
+- IntelliJ IDEA com o plugin **Cucumber for Java**. O próprio IntelliJ descarrega o JDK 21 e já traz o Maven.
+- A Toolshop a correr localmente com Docker ([instruções no repositório original](https://github.com/testsmith-io/practice-software-testing)), com a API em `http://localhost:8091`.
 
 1. Clonar o repositório:
    ```bash
@@ -52,7 +54,15 @@ E, desta vez, **o código é escrito por mim, linha a linha**. 💪
    - **Todos:** ▶️ ao lado de `ExecutarCucumberTest` (o runner).
    - **Uma funcionalidade ou um cenário:** ▶️ dentro do ficheiro `.feature`.
 
-> ℹ️ Por agora, os testes correm contra a **API pública** da Toolshop e **só fazem leituras** (GET). Os cenários que escrevem dados vão correr só na versão local da aplicação, em Docker.
+### 🐳 Onde correm os testes
+
+Por omissão, os testes correm contra a **Toolshop local** (`http://localhost:8091`). Para usar outro endereço, sem mexer no código, define a variável de ambiente `TOOLSHOP_API_URL`:
+
+```powershell
+$env:TOOLSHOP_API_URL = "https://api.practicesoftwaretesting.com"
+```
+
+> ⚠️ **Porquê o local por omissão?** A API pública é partilhada por muita gente. Durante a exploração, o catálogo público passou de **50 para 141 e depois para 150 produtos em poucos minutos**, porque outras pessoas estavam a criar produtos. Na Toolshop local, os totais mantêm-se estáveis, e os oráculos que comparam com o catálogo completo podem confiar no que percorrem. No ambiente público, só leituras (GET).
 
 ---
 
@@ -134,6 +144,8 @@ Ainda nenhum confirmado neste projeto. Os bugs só passam a *issue* depois de um
 
 ## 💡 Descobertas
 
+- 🌍 **O ambiente público muda enquanto o exploras:** no Swagger, o `GET /products` devolveu `total` 50, depois 141 e depois 150, em poucos minutos (outras pessoas a criar produtos). Por isso os cenários nunca têm totais escritos à mão e correm, por omissão, na Toolshop local.
+- 🔀 **O Swagger da Toolshop local envia os pedidos para o servidor público:** aberto em `localhost:8091`, o *Try it out* usa por omissão `api.practicesoftwaretesting.com`. Para falar com o Docker, é preciso escolher o servidor local na lista *Servers*, no topo da página. Só se dá por isso lendo o *Request URL*.
 - 🛡️ **Dependência vulnerável "escondida":** o REST Assured 6.3.0 traz consigo, como dependência transitiva, o `commons-codec 1.11`, que tem uma vulnerabilidade conhecida (WS-2019-0379). A versão 1.22.1 também tinha avisos (CVE-2026-119078 e CVE-2026-124077). A solução foi **forçar o `commons-codec 1.23.0`** no `dependencyManagement` do `pom.xml`, e os avisos desapareceram.
 
 ---
@@ -173,9 +185,10 @@ Projeto-toolshop-java/
 - [ ] Massa de teste em JSON (`dados/`)
 - [ ] Contratos com JSON Schema
 - [ ] Testes unitários das funções de oráculo
-- [ ] Aplicação local em Docker para os cenários que escrevem dados
+- [x] Testes a correr na Toolshop local (Docker), com o endereço configurável (`TOOLSHOP_API_URL`)
 - [ ] Relatório HTML do Cucumber
-- [ ] CI no GitHub Actions, com o relatório no GitHub Pages
+- [ ] Correr os testes pela linha de comandos (`mvn test`), com o Maven Wrapper (`mvnw`)
+- [ ] CI no GitHub Actions: a Toolshop em Docker na própria máquina da CI (a API fica em `localhost:8091`, por isso o endereço por omissão serve sem mudanças), Java 21 e o relatório no GitHub Pages
 
 ---
 

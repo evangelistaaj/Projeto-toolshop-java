@@ -38,6 +38,7 @@ Documento vivo: cresce a cada bloco do projeto. Para cada tema, o que se faz em 
 |---|---|---|---|
 | Biblioteca | Playwright (`APIRequestContext`) | **REST Assured** | O REST Assured é a biblioteca de referência para testar APIs em Java, e escreve-se como o Gherkin: `given().when().get(...).then()`. |
 | Endereço base | `baseURL` na configuração | `RestAssured.baseURI = "..."`, num hook `@Before` | Escreve-se uma só vez; os passos usam só o caminho (`/brands`). |
+| Endereço configurável | Variável de ambiente lida com `process.env` | `System.getenv().getOrDefault("TOOLSHOP_API_URL", "http://localhost:8091")` | A mesma ideia: o endereço vive **fora do código**. O `getOrDefault` dá um valor por omissão quando a variável não existe. |
 | Verificar o status | `expect(resposta.status()).toBe(200)` | `resposta.then().statusCode(200)` | No REST Assured, a verificação faz parte da "frase" da resposta. |
 
 ## 🥒 Cucumber
@@ -56,6 +57,7 @@ Documento vivo: cresce a cada bloco do projeto. Para cada tema, o que se faz em 
 |---|---|---|---|
 | Verificação falhou | `expect` falha, com "Expected… Received…" | `AssertionError`: "Expected status code <201> but was <200>" | O mesmo tipo de falha: a API respondeu, mas não o que esperávamos. |
 | Nem chegou a falar com a API | Erro de rede do Node | Exceção, por exemplo `UnknownHostException` | Não é uma falha da verificação: é um **erro** (o problema costuma estar no ambiente). |
+| Ninguém atende na porta | `ECONNREFUSED` | `ConnectException: Connection refused` | O endereço existe, mas a aplicação está parada (ex.: o Docker desligado). |
 | Ler o erro | Stack trace do Node | Stack trace Java (longo!) | Truque: ler só 3 linhas. A **mensagem** (o quê), a linha com **o teu `.java`** (onde no código) e a linha com **`✽` e o `.feature`** (que passo). |
 
 ## 🧰 Ferramentas
@@ -87,5 +89,6 @@ As imagens do dia a dia que ajudaram a perceber cada conceito. Servem para estud
 | PicoContainer | 👔 O **gerente**: monta um balcão novo e limpo para cada mesa e diz a todos "hoje trabalham neste". |
 | Construtor | 🕘 O **momento em que cada um entra ao serviço** e o gerente lhe diz qual é o balcão. |
 | `null` / `NullPointerException` | 🍽️❌ Ir conferir um prato que **não está lá**: "tentei usar X, mas X era nada". A pergunta seguinte é sempre: porque é que estava vazio? |
+| `UnknownHostException` / `Connection refused` / `AssertionError` | 📞 Ligar para um número que **não existe** / o número existe, mas o telefone está **desligado** / atenderam, mas a resposta **não era a esperada**. |
 | Sabotagem | 🔧 Estragar o teste de propósito: se não ficar vermelho, não estava a verificar nada. |
 | Falso positivo | ✅🤥 Um teste verde **pela razão errada** (ex.: um endereço inventado também dá 404). Um verde também se investiga. |
