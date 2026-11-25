@@ -34,7 +34,9 @@ E, desta vez, **o código é escrito por mim, linha a linha**. 💪
 | 📦 Maven | via Maven Wrapper (`mvnw`) | dependências, build e execução no terminal |
 | 🌐 REST Assured | 6.3.0 | pedidos HTTP e verificações (`given / when / then`) |
 | 🥒 Cucumber-JVM | 8.0.2 | cenários em Gherkin, em português |
-| ✅ JUnit Platform | 6.1.3 | motor de execução dos testes |
+| ✅ JUnit Platform | 6.1.3 | motor de execução dos testes (e os dois perfis: normal e bugs) |
+| 🎒 PicoContainer | via Cucumber 8.0.2 | partilhar o `Contexto` entre as classes de passos, um novo por cenário |
+| 🎯 Hamcrest | via REST Assured | verificações legíveis (`equalTo`, `hasSize`, `everyItem`…) |
 | 💡 IntelliJ IDEA | 2026.3 | editor (com o plugin *Cucumber for Java*) |
 
 ---
@@ -141,7 +143,7 @@ public void receboEssaMarca() {
 | Funcionalidade | Cenários | Estado |
 |---|---|---|
 | 🏷️ Marcas | 3 | ✅ a passar |
-| 🧰 Catálogo | 3 + 4 🐞 | ✅ a passar; 4 exemplos confirmam o bug [#28](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/28) |
+| 🧰 Catálogo | 4 + 4 🐞 | ✅ a passar; 4 exemplos confirmam o bug [#28](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/28) |
 
 🚧 Projeto em construção: os cenários do [projeto 2](https://github.com/evangelistaaj/Projeto-toolshop-api) vão chegar aqui, funcionalidade a funcionalidade.
 
@@ -156,6 +158,7 @@ public void receboEssaMarca() {
 - **Catálogo**
   - ✅ A lista de produtos não vem vazia, e cada produto tem `id` e `name` (texto), `price` (número) e `in_stock` (verdadeiro/falso).
   - ✅ A página 2 tem 9 produtos, do 10.º ao 18.º (página, produtos por página, tamanho da lista e posição).
+  - ✅ Percorrer todas as páginas devolve **cada produto uma só vez**: o número de produtos recebidos é o `total` que a API indica, e nenhum se repete (`Oraculos.repetidos`). As duas verificações juntas apanham o caso "+1 −1" (um produto repetido a esconder um desaparecido), que a contagem sozinha deixaria passar.
   - ✅ A página a seguir à última vem vazia, sem posição (`from` e `to` a `null`). A última página é lida da própria resposta, porque muda de ambiente para ambiente.
   - 🐞 Uma página inválida (**valores-limite** `0` e `-1`; **não inteiros** `abc` e `1.5`) devia ser recusada com **422**. Hoje a API devolve **200 com a página 1**, em silêncio.
 
@@ -168,6 +171,9 @@ public void receboEssaMarca() {
   - **NOK**: o caso negativo comporta-se como deve.
   - **Sabotagem**: altero o código de propósito para o teste ficar vermelho, e depois desfaço. Se a sabotagem não for apanhada, o teste não está a verificar nada.
 - **Desconfiar dos verdes:** um teste pode passar pela razão errada (*falso positivo*). Exemplo real deste projeto: um endereço mal escrito também devolvia 404, por isso o teste "da marca inexistente" passava sem testar marca nenhuma. A sabotagem e a revisão do código apanharam-no.
+- **O esperado vem sempre de fora do sistema:** do Swagger, da consistência com o resto da API e das normas HTTP, e nunca da própria resposta (um teste que concorda sempre com o sistema não testa nada). Quando a fonte é fraca, a descrição da Regra di-lo.
+- **Verificações que se complementam:** no catálogo completo, "recebi o total" e "nenhum repetido" juntas apanham o que cada uma sozinha deixaria passar.
+- **Explorar antes de automatizar:** cada funcionalidade começa no Swagger (local) ou no terminal, só com leituras, e só depois passa a cenário.
 - **Gherkin declarativo, em português:** um só `Quando` por cenário, `Regra:` com descrição e passos reutilizáveis com parâmetros (`{string}`, `{int}`).
 - **Endereço da API num só sítio:** um *hook* `@Before` do Cucumber define o `baseURI`, e os passos usam só o caminho (`/brands`).
 - **Versões geridas por BOM:** o JUnit e o Cucumber usam BOMs (*Bill of Materials*) no `dependencyManagement`, para as versões de cada família de bibliotecas serem compatíveis entre si.
@@ -187,10 +193,10 @@ Os bugs só passam a *issue* depois de um teste os confirmar. Este projeto testa
 
 ## 💡 Descobertas
 
+- 🗄️ **Cache das respostas (explorado na Toolshop local):** os dados públicos (`/brands`, `/categories`, `/products`) vêm com `Cache-Control: max-age=120, public` (podem ser guardados 2 minutos, por qualquer cache). Os dados pessoais (`/users/me`, `/invoices`) vêm com `no-cache, private`: nenhuma cache partilhada os guarda. A hipótese de risco **não se confirmou**. Nota de *hardening*: para dados sensíveis, a OWASP recomenda `no-store` (nem o browser guarda); com `no-cache, private`, uma fatura pode ficar no disco do browser, e as faturas chegaram a expor o número do cartão e o CVV ([#14 do projeto 2](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/14)). A cache de 120 s também **não explica** o atraso do stock ([#10](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/10)): o atraso chega aos 5 minutos e acontece sem nenhuma cache pelo meio.
 - 📄 **O 422 está no Swagger, mas não no `GET /products`:** a documentação define o 422 (`UnprocessableEntityResponse`, "the server was not able to process the content") em **28 das 88 operações**, incluindo um GET (`/postcode-lookup`, que responde mesmo 422 a um código postal inválido). O `GET /products` só documenta 200, 404 e 405, e o `page` é um inteiro sem mínimo definido. O esperado dos cenários da página inválida vem desta consistência, e está escrito na descrição da Regra.
-- 🔀 **A causa do Swagger local que falava com o público:** a lista `servers` da especificação tem o endereço público **em primeiro lugar**, e o Swagger usa o primeiro por omissão.
 - 🌍 **O ambiente público muda enquanto o exploras:** no Swagger, o `GET /products` devolveu `total` 50, depois 141 e depois 150, em poucos minutos (outras pessoas a criar produtos). Por isso os cenários nunca têm totais escritos à mão e correm, por omissão, na Toolshop local.
-- 🔀 **O Swagger da Toolshop local envia os pedidos para o servidor público:** aberto em `localhost:8091`, o *Try it out* usa por omissão `api.practicesoftwaretesting.com`. Para falar com o Docker, é preciso escolher o servidor local na lista *Servers*, no topo da página. Só se dá por isso lendo o *Request URL*.
+- 🔀 **O Swagger da Toolshop local envia os pedidos para o servidor público:** aberto em `localhost:8091`, o *Try it out* usa por omissão `api.practicesoftwaretesting.com`. Para falar com o Docker, é preciso escolher o servidor local na lista *Servers*, no topo da página. Só se dá por isso lendo o *Request URL*. **A causa:** a lista `servers` da especificação tem o endereço público **em primeiro lugar**, e o Swagger usa o primeiro por omissão.
 - 🛡️ **Dependência vulnerável "escondida":** o REST Assured 6.3.0 traz consigo, como dependência transitiva, o `commons-codec 1.11`, que tem uma vulnerabilidade conhecida (WS-2019-0379). A versão 1.22.1 também tinha avisos (CVE-2026-119078 e CVE-2026-124077). A solução foi **forçar o `commons-codec 1.23.0`** no `dependencyManagement` do `pom.xml`, e os avisos desapareceram.
 
 ---
@@ -221,7 +227,8 @@ Projeto-toolshop-java/
     │   │   ├── MarcasSteps.java
     │   │   └── CatalogoSteps.java
     │   └── support/
-    │       └── Contexto.java             # o "balcão" partilhado entre os passos (PicoContainer)
+    │       ├── Contexto.java             # o "balcão" partilhado entre os passos (PicoContainer)
+    │       └── Oraculos.java             # funções de oráculo (ex.: repetidos)
     └── resources/
         ├── cucumber.properties           # onde estão os passos (quando se corre pelo .feature)
         └── features/
@@ -237,21 +244,23 @@ Projeto-toolshop-java/
 - [x] Primeiro teste REST Assured (com as três provas)
 - [x] Correção da dependência vulnerável
 - [x] Cucumber-JVM ligado ao JUnit, com cenários em português
-- [ ] Separar os passos comuns (`ComumSteps`) dos passos de cada funcionalidade
+- [x] Separar os passos comuns (`ComumSteps`) dos passos de cada funcionalidade, com o `Contexto` partilhado (PicoContainer)
+- [x] Testes a correr na Toolshop local (Docker), com o endereço configurável (`TOOLSHOP_API_URL`)
+- [x] Correr os testes pela linha de comandos, com o Maven Wrapper (`mvnw test`)
+- [x] Dois perfis: normal e bugs conhecidos
+- [ ] Testes unitários das funções de oráculo
+- [ ] Catálogo: pesquisa, filtros e ordenação
 - [ ] Trazer as restantes funcionalidades do projeto 2 (produtos, categorias, utilizadores, login…)
 - [ ] Massa de teste em JSON (`dados/`)
 - [ ] Contratos com JSON Schema
-- [ ] Testes unitários das funções de oráculo
-- [x] Testes a correr na Toolshop local (Docker), com o endereço configurável (`TOOLSHOP_API_URL`)
 - [ ] Relatório HTML do Cucumber
-- [x] Correr os testes pela linha de comandos, com o Maven Wrapper (`mvnw test`)
 - [ ] CI no GitHub Actions: a Toolshop em Docker na própria máquina da CI (a API fica em `localhost:8091`, por isso o endereço por omissão serve sem mudanças), Java 21 e o relatório no GitHub Pages
 
 ---
 
 ## 👤 Autor
 
-**Arthur Evangelista** 
+**Arthur Evangelista**
 
 - 🐙 GitHub: [@evangelistaaj](https://github.com/evangelistaaj)
 - 📓 A jornada, passo a passo: [`DIARIO.md`](DIARIO.md)

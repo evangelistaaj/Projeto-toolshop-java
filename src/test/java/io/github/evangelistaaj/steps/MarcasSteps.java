@@ -1,6 +1,5 @@
 package io.github.evangelistaaj.steps;
 
-import io.cucumber.java.PendingException;
 import io.cucumber.java.pt.Então;
 import io.cucumber.java.pt.Quando;
 import io.github.evangelistaaj.support.Contexto;

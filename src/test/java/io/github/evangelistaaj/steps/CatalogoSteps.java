@@ -3,8 +3,13 @@ package io.github.evangelistaaj.steps;
 import io.cucumber.java.pt.Então;
 import io.cucumber.java.pt.Quando;
 import io.github.evangelistaaj.support.Contexto;
+import io.github.evangelistaaj.support.Oraculos;
+import io.restassured.response.Response;
+
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class CatalogoSteps {
@@ -69,5 +74,31 @@ public class CatalogoSteps {
     @Quando("consulto {string} com {string}")
     public void consultoCom(String endereco, String parametros) {
         contexto.resposta = given().when().get(endereco + "?" + parametros);
+    }
+
+    @Quando("percorro todas as páginas do catálogo")
+    public void percorroTodasAsPaginasDoCatalogo() {
+        Response primeira = given().queryParam("page", 1).when().get("/products")
+            .then().statusCode(200)
+            .extract().response();
+
+        contexto.totalDoCatalogo = primeira.path("total");
+        int ultima = primeira.path("last_page");
+        contexto.idsPercorridos.addAll(primeira.path("data.id"));
+
+        for (int pagina = 2; pagina <= ultima; pagina++) {
+            List<String> ids = given().queryParam("page", pagina).when().get("/products")
+                .then().statusCode(200)
+                .extract().path("data.id");
+            contexto.idsPercorridos.addAll(ids);
+        }
+    }
+
+    @Então("recebo cada produto do catálogo uma só vez")
+    public void receboCadaProdutoDoCatalogoUmaSoVez() {
+        assertThat("produtos recebidos = total que a API indicou",
+            contexto.idsPercorridos.size(), equalTo(contexto.totalDoCatalogo));
+        assertThat("produtos repetidos entre páginas",
+            Oraculos.repetidos(contexto.idsPercorridos), empty());
     }
 }

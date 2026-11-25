@@ -22,6 +22,10 @@ Funcionalidade: Catálogo de produtos
       Quando consulto a página a seguir à última do catálogo
       Então a página vem vazia
 
+    Cenário: Percorrer o catálogo devolve cada produto uma só vez
+      Quando percorro todas as páginas do catálogo
+      Então recebo cada produto do catálogo uma só vez
+
 
   Regra: Um número de página que não é válido é recusado
   O Swagger define a página como um número inteiro, sem dizer a partir de

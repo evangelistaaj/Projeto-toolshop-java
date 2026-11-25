@@ -28,6 +28,9 @@ Documento vivo: cresce a cada bloco do projeto. Para cada tema, o que se faz em 
 | Onde vive o código | Funções e ficheiros soltos | **Tudo dentro de uma classe** (e o nome da classe = o nome do ficheiro) | O Java é orientado a objetos "à força". A classe é a caixa que agrupa tudo. |
 | Ponto e vírgula | Opcional | **Obrigatório** | Regra da linguagem. Esquecer um `;` é erro de compilação. |
 | Tipos | Opcionais, muitas vezes adivinhados | **Obrigatórios**: `String id`, `int statusEsperado`, `Response resposta` | O Java quer saber sempre o tipo de cada coisa. O IntelliJ mostra-os a cinzento quando não os escreves. |
+| Listas | `const ids: string[] = []`, `ids.push(...)`, `ids.length` | `List<String> ids = new ArrayList<>()`, `ids.addAll(...)`, `ids.size()` | Em Java diz-se **o tipo** do que vai na lista (`<String>`) e escolhe-se a "implementação" (`ArrayList`). |
+| Encontrar repetidos | `lista.filter((e, i) => lista.indexOf(e) !== i)` | um `Set` (porteiro com memória 🚪): `vistos.add(e)` devolve `false` se já lá estava | As duas funcionam; o `Set` é a forma típica do Java e é mais rápido em listas grandes. |
+| Verificar um valor "solto" | `expect(ids.length, 'mensagem').toBe(total)` | `assertThat("mensagem", ids.size(), equalTo(total))` | No Java a **mensagem vem primeiro**. |
 | Escrever no ecrã | `console.log(...)` | `System.out.println(...)` | É só o nome. |
 | Imports | `import { x } from '...'` | `import pacote.Classe;` e `import static ...` (para usar `given()` sem o nome da classe) | Em Java, sem import, aparece **`cannot find symbol`**. O `Alt+Enter` do IntelliJ escreve-os por ti. |
 | Pastas de código | Livres (`steps/`, `support/`…) | **Convenção Maven**: `src/main/java` (código da aplicação) e `src/test/java` + `src/test/resources` (testes e ficheiros não-Java, como os `.feature`) | O Maven espera esta "planta da casa", e toda a gente a segue. |

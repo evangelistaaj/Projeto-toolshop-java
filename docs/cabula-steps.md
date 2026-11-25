@@ -60,6 +60,24 @@ public void pecoUmaMarcaDaListaPeloSeuId() {
 
 ---
 
+## 📋 Quando há muitos valores: listas, ciclos e conjuntos
+
+| Preciso de... | Receita | Analogia |
+|---|---|---|
+| guardar **muitos** valores | `List<String> ids = new ArrayList<>();` · `ids.add(x)` · `ids.addAll(outra)` · `ids.size()` · `ids.get(0)` (o 1.º) | 📒 um caderno |
+| **repetir** um pedido para cada página | `for (int pagina = 2; pagina <= ultima; pagina++) { ... }` | 🔁 "para a página 2, 3, ... até à última" |
+| percorrer **cada elemento** de uma lista | `for (String id : ids) { ... }` | "para cada id do caderno" |
+| saber se algo **já apareceu** | `Set<String> vistos = new HashSet<>();` · `vistos.add(x)` devolve `false` se já lá estava | 🚪 um porteiro com memória |
+| verificar um valor **meu** (e não da resposta) | `assertThat("mensagem se falhar", oQueTenho, equalTo(oQueDevia))` | |
+
+⚠️ Tudo o que está **entre as chavetas `{ }`** de um `for` repete-se a cada volta; o que está **depois** do `}` corre uma vez.
+
+🧠 **Uma verificação sozinha pode ser enganada.** "Recebi 200 produtos" passa mesmo que um venha repetido e outro falte (+1 −1). Juntar "nenhum repetido" fecha o buraco: 200 ids todos diferentes num catálogo de 200 = não falta nenhum.
+
+🔮 **Funções de oráculo** (verificações que vamos reutilizar) vivem no `support/Oraculos.java`, como o `support/oraculos.ts` do projeto 2: `Oraculos.repetidos(lista)` devolve a lista dos repetidos (vazia = tudo bem).
+
+---
+
 ## 🗺️ Caminhos dentro do JSON (o 1.º argumento do `.body(...)` e do `.path(...)`)
 
 | Caminho | Dá... |
@@ -83,6 +101,9 @@ public void pecoUmaMarcaDaListaPeloSeuId() {
 ```java
 import static io.restassured.RestAssured.given;   // given()
 import static org.hamcrest.Matchers.*;            // equalTo, hasSize, empty, everyItem, nullValue...
+import static org.hamcrest.MatcherAssert.assertThat; // verificar valores que não vêm da resposta
+import java.util.List; import java.util.ArrayList; // listas
+import java.util.Set; import java.util.HashSet;     // conjuntos
 import io.restassured.response.Response;          // guardar uma resposta numa variável
 import io.cucumber.java.pt.Quando;                // @Quando
 import io.cucumber.java.pt.Então;                 // @Então
