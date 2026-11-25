@@ -22,9 +22,15 @@ Funcionalidade: Catálogo de produtos
       Quando consulto a página a seguir à última do catálogo
       Então a página vem vazia
 
-    Cenário: Percorrer o catálogo devolve cada produto uma só vez
-      Quando percorro todas as páginas do catálogo
+    Esquema do Cenário: Percorrer o catálogo, com a ordem <ordem>, devolve cada produto uma só vez
+      Quando percorro todas as páginas do catálogo, com a ordem "<ordem>"
       Então recebo cada produto do catálogo uma só vez
+
+      Exemplos:
+        | ordem             |
+        | por omissão       |
+        | nome crescente    |
+        | preço decrescente |
 
 
   Regra: Um número de página que não é válido é recusado

@@ -5,6 +5,7 @@ import io.cucumber.java.pt.Quando;
 import io.github.evangelistaaj.support.Contexto;
 import io.github.evangelistaaj.support.Oraculos;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 
 import java.util.List;
 
@@ -76,22 +77,38 @@ public class CatalogoSteps {
         contexto.resposta = given().when().get(endereco + "?" + parametros);
     }
 
-    @Quando("percorro todas as páginas do catálogo")
-    public void percorroTodasAsPaginasDoCatalogo() {
-        Response primeira = given().queryParam("page", 1).when().get("/products")
-            .then().statusCode(200)
-            .extract().response();
+    @Quando("percorro todas as páginas do catálogo, com a ordem {string}")
+    public void percorroTodasAsPaginasDoCatalogoComAOrdem(String ordem) {
+        String sort = sortDaOrdem(ordem);
+        Response primeira = pagina(1, sort);
 
         contexto.totalDoCatalogo = primeira.path("total");
         int ultima = primeira.path("last_page");
         contexto.idsPercorridos.addAll(primeira.path("data.id"));
 
-        for (int pagina = 2; pagina <= ultima; pagina++) {
-            List<String> ids = given().queryParam("page", pagina).when().get("/products")
-                .then().statusCode(200)
-                .extract().path("data.id");
+        for (int numero = 2; numero <= ultima; numero++) {
+            List<String> ids = pagina(numero, sort).path("data.id");
             contexto.idsPercorridos.addAll(ids);
         }
+    }
+
+    private Response pagina(int numero, String sort) {
+        RequestSpecification pedido = given().queryParam("page", numero);
+        if (sort != null) {
+            pedido.queryParam("sort", sort);
+        }
+        return pedido.when().get("/products").then().statusCode(200).extract().response();
+    }
+
+    private static String sortDaOrdem(String ordem) {
+        return switch (ordem) {
+            case "por omissão" -> null;
+            case "nome crescente" -> "name,asc";
+            case "nome decrescente" -> "name,desc";
+            case "preço crescente" -> "price,asc";
+            case "preço decrescente" -> "price,desc";
+            default -> throw new IllegalArgumentException("Ordem desconhecida: \"" + ordem + "\"");
+        };
     }
 
     @Então("recebo cada produto do catálogo uma só vez")
