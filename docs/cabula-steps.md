@@ -78,6 +78,22 @@ public void pecoUmaMarcaDaListaPeloSeuId() {
 
 ---
 
+## 🧩 Organizar o código dos passos
+
+| Preciso de... | Receita |
+|---|---|
+| **traduzir** o português do cenário para o valor da API | `switch (ordem) { case "nome crescente" -> "name,asc"; ... default -> throw new IllegalArgumentException("Ordem desconhecida: " + ordem); }` (o `default` apanha enganos de escrita no Gherkin) |
+| não repetir o mesmo código (pedir uma página, guardar dados) | um método **ajudante** `private` dentro da classe dos passos (não tem `@Quando`, só trabalha para os passos) |
+| juntar coisas ao pedido aos poucos | `RequestSpecification pedido = given()...;` · `if (sort != null) { pedido.queryParam("sort", sort); }` |
+| uma pergunta numa linha | `crescente ? comparacao > 0 : comparacao < 0` ("se crescente, isto; senão, aquilo") |
+| comparar dois valores | `a.compareToIgnoreCase(b)` (texto) · `Double.compare(a, b)` (números): negativo = `a` antes, 0 = iguais, positivo = `a` depois |
+| ler uma lista com o tipo certo | `resposta.jsonPath().getList("data.price", Double.class)` |
+
+⚠️ **Refatorar** = melhorar a organização sem mudar o comportamento. Quem prova que não mudou? Os testes, que continuam verdes.
+⚠️ **Ordenar texto é traiçoeiro:** o `Collator` do Java ignora os espaços ("Wood Saw" vs "Wooden"); o `compareToIgnoreCase` não. Antes de usar um oráculo novo, testa-o com casos parecidos.
+
+---
+
 ## 🔬 Testar uma função de oráculo (testes unitários)
 
 ```java

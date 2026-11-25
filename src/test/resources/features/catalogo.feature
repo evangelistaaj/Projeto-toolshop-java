@@ -61,3 +61,19 @@ Funcionalidade: Catálogo de produtos
         | problema          | endereço  | parâmetros |
         | letras            | /products | page=abc   |
         | um número decimal | /products | page=1.5   |
+
+
+  Regra: A ordenação vale para o catálogo inteiro, não só para a primeira página
+  Os produtos com o mesmo valor podem vir em qualquer ordem. Os nomes comparam-se
+  sem distinguir maiúsculas.
+
+    Esquema do Cenário: Percorrer o catálogo por <ordem> devolve os produtos nessa ordem
+      Quando percorro todas as páginas do catálogo, com a ordem "<ordem>"
+      Então os produtos vêm ordenados por "<ordem>"
+
+      Exemplos:
+        | ordem             |
+        | nome crescente    |
+        | nome decrescente  |
+        | preço crescente   |
+        | preço decrescente |

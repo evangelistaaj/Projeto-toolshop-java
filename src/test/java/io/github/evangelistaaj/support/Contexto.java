@@ -13,4 +13,6 @@ public class Contexto {
     public String slugDaMarca;
     public List<String> idsPercorridos = new ArrayList<>();
     public int totalDoCatalogo;
+    public List<String> nomesPercorridos = new ArrayList<>();
+    public List<Double> precosPercorridos = new ArrayList<>();
 }

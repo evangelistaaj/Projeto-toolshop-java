@@ -1,9 +1,6 @@
 package io.github.evangelistaaj.support;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Oraculos {
 
@@ -16,5 +13,31 @@ public class Oraculos {
             }
         }
         return repetidos;
+    }
+
+    public static List<String> nomesForaDeOrdem(List<String> nomes, boolean crescente) {
+        List<String> pares = new ArrayList<>();
+        for (int i = 1; i < nomes.size(); i++) {
+            String anterior = nomes.get(i - 1);
+            String seguinte = nomes.get(i);
+            int comparacao = anterior.compareToIgnoreCase(seguinte);
+            if (crescente ? comparacao > 0 : comparacao < 0) {
+                pares.add(anterior + " antes de " + seguinte);
+            }
+        }
+        return pares;
+    }
+
+    public static List<String> precosForaDeOrdem(List<Double> precos, boolean crescente) {
+        List<String> pares = new ArrayList<>();
+        for (int i = 1; i < precos.size(); i++) {
+            double anterior = precos.get(i - 1);
+            double seguinte = precos.get(i);
+            int comparacao = Double.compare(anterior, seguinte);
+            if (crescente ? comparacao > 0 : comparacao < 0) {
+                pares.add(anterior + " antes de " + seguinte);
+            }
+        }
+        return pares;
     }
 }

@@ -143,7 +143,7 @@ public void receboEssaMarca() {
 | Funcionalidade | Cenários | Estado |
 |---|---|---|
 | 🏷️ Marcas | 3 | ✅ a passar |
-| 🧰 Catálogo | 4 + 4 🐞 | ✅ a passar; 4 exemplos confirmam o bug [#28](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/28) |
+| 🧰 Catálogo | 13 + 4 🐞 | ✅ a passar; 4 exemplos confirmam o bug [#28](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/28) |
 
 🚧 Projeto em construção: os cenários do [projeto 2](https://github.com/evangelistaaj/Projeto-toolshop-api) vão chegar aqui, funcionalidade a funcionalidade.
 
@@ -158,7 +158,8 @@ public void receboEssaMarca() {
 - **Catálogo**
   - ✅ A lista de produtos não vem vazia, e cada produto tem `id` e `name` (texto), `price` (número) e `in_stock` (verdadeiro/falso).
   - ✅ A página 2 tem 9 produtos, do 10.º ao 18.º (página, produtos por página, tamanho da lista e posição).
-  - ✅ Percorrer todas as páginas devolve **cada produto uma só vez**: o número de produtos recebidos é o `total` que a API indica, e nenhum se repete (`Oraculos.repetidos`). As duas verificações juntas apanham o caso "+1 −1" (um produto repetido a esconder um desaparecido), que a contagem sozinha deixaria passar.
+  - ✅ Percorrer todas as páginas, **por omissão, por nome e por preço**, devolve **cada produto uma só vez** (com preços iguais, uma ordenação sem desempate estável podia repetir ou perder produtos entre páginas): o número de produtos recebidos é o `total` que a API indica, e nenhum se repete (`Oraculos.repetidos`). As duas verificações juntas apanham o caso "+1 −1" (um produto repetido a esconder um desaparecido), que a contagem sozinha deixaria passar.
+  - ✅ A **ordenação vale para o catálogo inteiro** (nome e preço, crescente e decrescente): percorridas todas as páginas, nenhum par de vizinhos está fora de ordem (`Oraculos.nomesForaDeOrdem` e `precosForaDeOrdem`). Valores iguais podem vir em qualquer ordem; os nomes comparam-se sem distinguir maiúsculas.
   - ✅ A página a seguir à última vem vazia, sem posição (`from` e `to` a `null`). A última página é lida da própria resposta, porque muda de ambiente para ambiente.
   - 🐞 Uma página inválida (**valores-limite** `0` e `-1`; **não inteiros** `abc` e `1.5`) devia ser recusada com **422**. Hoje a API devolve **200 com a página 1**, em silêncio.
 
@@ -194,6 +195,8 @@ Os bugs só passam a *issue* depois de um teste os confirmar. Este projeto testa
 
 ## 💡 Descobertas
 
+- 🪚 **"Wood Saw" antes de "Wooden Workbench": o erro estava no teste.** A primeira versão do oráculo da ordenação usava o `Collator` do Java (regras do inglês), que **ignora os espaços**: comparava "woodsaw" com "woodenworkbench" e acusava a API. A API estava certa: como num dicionário, o espaço vem antes das letras. Lição: traduzir uma ferramenta (o `localeCompare` do projeto 2) não é traduzir o comportamento. O oráculo passou a usar `compareToIgnoreCase`, que serve para estes nomes (em inglês, sem acentos); o plano é validar um dia contra a própria base de dados (SQL).
+- 🧪 **Produtos de teste na base local (hipótese):** a Toolshop local tem dezenas de produtos como `Wood Chisel Set 4 Pieces - ref. MWP6U00AA0L`, que não existem nos dados iniciais. Parecem ter ficado de execuções do projeto 2; falta confirmar. Não afeta os testes deste projeto, que leem o total da própria resposta.
 - 🗄️ **Cache das respostas (explorado na Toolshop local):** os dados públicos (`/brands`, `/categories`, `/products`) vêm com `Cache-Control: max-age=120, public` (podem ser guardados 2 minutos, por qualquer cache). Os dados pessoais (`/users/me`, `/invoices`) vêm com `no-cache, private`: nenhuma cache partilhada os guarda. A hipótese de risco **não se confirmou**. Nota de *hardening*: para dados sensíveis, a OWASP recomenda `no-store` (nem o browser guarda); com `no-cache, private`, uma fatura pode ficar no disco do browser, e as faturas chegaram a expor o número do cartão e o CVV ([#14 do projeto 2](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/14)). A cache de 120 s também **não explica** o atraso do stock ([#10](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/10)): o atraso chega aos 5 minutos e acontece sem nenhuma cache pelo meio.
 - 📄 **O 422 está no Swagger, mas não no `GET /products`:** a documentação define o 422 (`UnprocessableEntityResponse`, "the server was not able to process the content") em **28 das 88 operações**, incluindo um GET (`/postcode-lookup`, que responde mesmo 422 a um código postal inválido). O `GET /products` só documenta 200, 404 e 405, e o `page` é um inteiro sem mínimo definido. O esperado dos cenários da página inválida vem desta consistência, e está escrito na descrição da Regra.
 - 🌍 **O ambiente público muda enquanto o exploras:** no Swagger, o `GET /products` devolveu `total` 50, depois 141 e depois 150, em poucos minutos (outras pessoas a criar produtos). Por isso os cenários nunca têm totais escritos à mão e correm, por omissão, na Toolshop local.
@@ -252,10 +255,14 @@ Projeto-toolshop-java/
 - [x] Correr os testes pela linha de comandos, com o Maven Wrapper (`mvnw test`)
 - [x] Dois perfis: normal e bugs conhecidos
 - [x] Testes unitários das funções de oráculo (JUnit), com sabotagem
-- [ ] Catálogo: pesquisa, filtros e ordenação
+- [x] Catálogo: ordenação (nome e preço) no catálogo inteiro
+- [ ] Testes unitários dos oráculos da ordenação (com "Wood Saw" antes de "Wooden Workbench" como regressão)
+- [ ] Mensagens de falha resumidas nos oráculos (o total e só os primeiros exemplos)
+- [ ] Catálogo: pesquisa e filtros
 - [ ] Trazer as restantes funcionalidades do projeto 2 (produtos, categorias, utilizadores, login…)
 - [ ] Massa de teste em JSON (`dados/`)
 - [ ] Contratos com JSON Schema
+- [ ] Validar a ordenação por nome contra a própria base de dados (SQL com `ORDER BY name`), para o oráculo deixar de imitar as regras de ordenação
 - [ ] Relatório HTML do Cucumber
 - [ ] CI no GitHub Actions: a Toolshop em Docker na própria máquina da CI (a API fica em `localhost:8091`, por isso o endereço por omissão serve sem mudanças), Java 21 e o relatório no GitHub Pages
 

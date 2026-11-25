@@ -31,6 +31,8 @@ Documento vivo: cresce a cada bloco do projeto. Para cada tema, o que se faz em 
 | Listas | `const ids: string[] = []`, `ids.push(...)`, `ids.length` | `List<String> ids = new ArrayList<>()`, `ids.addAll(...)`, `ids.size()` | Em Java diz-se **o tipo** do que vai na lista (`<String>`) e escolhe-se a "implementação" (`ArrayList`). |
 | Encontrar repetidos | `lista.filter((e, i) => lista.indexOf(e) !== i)` | um `Set` (porteiro com memória 🚪): `vistos.add(e)` devolve `false` se já lá estava | As duas funcionam; o `Set` é a forma típica do Java e é mais rápido em listas grandes. |
 | Verificar um valor "solto" | `expect(ids.length, 'mensagem').toBe(total)` | `assertThat("mensagem", ids.size(), equalTo(total))` | No Java a **mensagem vem primeiro**. |
+| Comparar nomes para ordenar | `a.toLowerCase().localeCompare(b.toLowerCase(), 'en')` (conta os espaços) | `a.compareToIgnoreCase(b)` | O "equivalente óbvio", o `Collator` do Java com `Locale.ENGLISH`, **ignora os espaços** e acusou a API sem razão ("Wood Saw" vs "Wooden Workbench"). **Traduzir uma ferramenta não é traduzir o comportamento.** |
+| Traduzir um valor do cenário | um objeto `ORDENS[nome]` | um `switch` com `case ... ->` e um `default` que lança um erro | Os dois apanham nomes desconhecidos; o `switch` é a forma típica do Java moderno. |
 | Escrever no ecrã | `console.log(...)` | `System.out.println(...)` | É só o nome. |
 | Imports | `import { x } from '...'` | `import pacote.Classe;` e `import static ...` (para usar `given()` sem o nome da classe) | Em Java, sem import, aparece **`cannot find symbol`**. O `Alt+Enter` do IntelliJ escreve-os por ti. |
 | Pastas de código | Livres (`steps/`, `support/`…) | **Convenção Maven**: `src/main/java` (código da aplicação) e `src/test/java` + `src/test/resources` (testes e ficheiros não-Java, como os `.feature`) | O Maven espera esta "planta da casa", e toda a gente a segue. |
@@ -100,6 +102,8 @@ As imagens do dia a dia que ajudaram a perceber cada conceito. Servem para estud
 | Construtor | 🕘 O **momento em que cada um entra ao serviço** e o gerente lhe diz qual é o balcão. |
 | `null` / `NullPointerException` | 🍽️❌ Ir conferir um prato que **não está lá**: "tentei usar X, mas X era nada". A pergunta seguinte é sempre: porque é que estava vazio? |
 | `UnknownHostException` / `Connection refused` / `AssertionError` | 📞 Ligar para um número que **não existe** / o número existe, mas o telefone está **desligado** / atenderam, mas a resposta **não era a esperada**. |
+| Ordenação por vizinhos | 👀 Para saber se uma fila está por ordem de altura, basta comparar cada pessoa com a seguinte. |
+| `Collator` vs `compareToIgnoreCase` | 📖 Um dicionário que ignora os espaços acharia que "Wooden" vem antes de "Wood Saw". Um dicionário normal sabe que "nada" vem antes de "alguma coisa". |
 | Sabotagem | 🔧 Estragar o teste de propósito: se não ficar vermelho, não estava a verificar nada. |
 | Testes unitários de um oráculo | ⚖️ **Testar a balança** com pesos conhecidos: "este prato pesa 1 kg; a balança diz 1 kg?" E também com o prato vazio: uma balança que diz sempre "zero" só é apanhada com um peso a sério. |
 | Falso positivo | ✅🤥 Um teste verde **pela razão errada** (ex.: um endereço inventado também dá 404). Um verde também se investiga. |

@@ -84,12 +84,17 @@ public class CatalogoSteps {
 
         contexto.totalDoCatalogo = primeira.path("total");
         int ultima = primeira.path("last_page");
-        contexto.idsPercorridos.addAll(primeira.path("data.id"));
+        guardar(primeira);
 
         for (int numero = 2; numero <= ultima; numero++) {
-            List<String> ids = pagina(numero, sort).path("data.id");
-            contexto.idsPercorridos.addAll(ids);
+            guardar(pagina(numero, sort));
         }
+    }
+
+    private void guardar(Response pagina) {
+        contexto.idsPercorridos.addAll(pagina.jsonPath().getList("data.id", String.class));
+        contexto.nomesPercorridos.addAll(pagina.jsonPath().getList("data.name", String.class));
+        contexto.precosPercorridos.addAll(pagina.jsonPath().getList("data.price", Double.class));
     }
 
     private Response pagina(int numero, String sort) {
@@ -117,5 +122,19 @@ public class CatalogoSteps {
             contexto.idsPercorridos.size(), equalTo(contexto.totalDoCatalogo));
         assertThat("produtos repetidos entre páginas",
             Oraculos.repetidos(contexto.idsPercorridos), empty());
+    }
+
+    @Então("os produtos vêm ordenados por {string}")
+    public void osProdutosVemOrdenadosPor(String ordem) {
+        assertThat("produtos recebidos", contexto.nomesPercorridos.size(), greaterThan(1));
+
+        List<String> paresForaDeOrdem = switch (ordem) {
+            case "nome crescente" -> Oraculos.nomesForaDeOrdem(contexto.nomesPercorridos, true);
+            case "nome decrescente" -> Oraculos.nomesForaDeOrdem(contexto.nomesPercorridos, false);
+            case "preço crescente" -> Oraculos.precosForaDeOrdem(contexto.precosPercorridos, true);
+            case "preço decrescente" -> Oraculos.precosForaDeOrdem(contexto.precosPercorridos, false);
+            default -> throw new IllegalArgumentException("Ordem que não se pode verificar: \"" + ordem + "\"");
+        };
+        assertThat("pares fora da ordem \"" + ordem + "\"", paresForaDeOrdem, empty());
     }
 }
