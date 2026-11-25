@@ -87,3 +87,41 @@ Uma entrada por sessão: o que se fez, o conceito novo, o bug (ou susto) mais in
 - 🧰 Catálogo: percorrer todas as páginas (cada produto uma só vez), pesquisa, filtros e ordenação (os oráculos "a sério", comparados com o catálogo completo).
 - ☁️ CI no GitHub Actions, quando houver mais cenários (o Maven Wrapper já está pronto).
 - 🔣 No terminal do Windows, o `✽` das mensagens do Cucumber aparece como `?` (só cosmético; ver com a CI).
+
+---
+
+## 2026-11-25 — Sessão 3: explorar, desconfiar e confirmar
+
+**O que fiz**
+- Escrevi no autocarro (no telemóvel!) o Gherkin dos **valores-limite** do `page` (`0`, `-1`, `abc`, `1.5`), com um `Esquema do Cenário` e duas tabelas de Exemplos, uma por **partição de equivalência**.
+- Explorei esses valores e a API respondeu **200 com a página 1** a todos: é mais um caso do bug **#28** do projeto 2. O cenário mantém o **422**, com a tag `@bug-conhecido @issue-28`, e o comentário com as provas foi publicado no issue.
+- Fui investigar **de onde vinha o 422**: descarreguei a especificação do Swagger (`api-docs.json`) e encontrei-o em 28 das 88 operações (através de um `$ref`), mas **não** no `GET /products`. Confirmei a "convenção da casa" com o meu próprio pedido (`/postcode-lookup` → 422).
+- Criei os **dois perfis**: o normal (`ExecutarCucumberTest`, sem os bugs) e o dos bugs conhecidos (`ExecutarBugsConhecidos`).
+- Marcas: o cenário que faltava, **pedir uma marca que existe** (escolhida da própria lista, porque a mesma marca tem ids diferentes no público e no Docker).
+- Explorei o **`Cache-Control`**: os dados públicos vêm com `public` e os pessoais com `private`. A suspeita de risco não se confirmou.
+- Catálogo: **percorrer as 23 páginas** (cada produto uma só vez, com várias ordens) e a **ordenação** por nome e por preço no catálogo inteiro.
+- Criei a função de oráculo `Oraculos.repetidos` e os seus **testes unitários** (JUnit puro). Também a `docs/cabula-steps.md`, com a forma de pensar um `Quando` e um `Então`.
+
+**Conceitos novos**
+- **Partições de equivalência** e **valores-limite** (o `9999` não é inválido: é a partição "válido, sem produtos").
+- **Oráculos de consistência (HICCUPPS):** o esperado vem de fora do sistema (o documentado, a consistência com o resto do produto, as normas HTTP, o que o utilizador espera), e nunca da própria resposta.
+- O **`$ref`** do OpenAPI: uma "nota de rodapé" que aponta para uma definição comum.
+- **Filtrar por tags:** o `@ExcludeTags`/`@IncludeTags` do JUnit (o porteiro à porta 🎭) vs o `cucumber.filter.tags` (que marca como "saltados").
+- Java: `List`, `ArrayList`, o `for` (com números e "para cada"), o `Set` (o porteiro com memória 🚪), o `assertThat`, o `switch`, os métodos ajudantes `private`, o operador ternário, o `compareToIgnoreCase`.
+- **Verificações que se complementam:** "recebi o total" + "nenhum repetido" apanham o caso "+1 −1".
+- **Testar os testes:** um caso que tem de apanhar + um controlo que tem de deixar passar (testar a balança ⚖️).
+- **Refatorar:** melhorar a organização sem mudar o comportamento (os testes provam-no).
+- **YAGNI / KISS:** a solução simples, testada e que falha alto dá menos manutenção do que a "preparada para tudo".
+
+**O bug mais interessante**
+- O meu teste acusou a API: *"Wood Saw antes de Wooden Workbench"*. Investigámos e **o erro estava no teste**: o `Collator` do Java ignora os espaços. A API ordenava como um dicionário, e estava certa. O vermelho foi **vermelho → hipótese → prova → correção → verde**.
+
+**Frase para o LinkedIn**
+> "Hoje o meu teste acusou a API de não saber o alfabeto. 🪚 Investiguei... e quem não sabia o alfabeto era o meu teste. O erro está no sistema ou no meu teste? Desta vez, no meu. E ainda bem que fui ver antes de abrir o bug."
+
+**Pendências para a próxima sessão**
+- 🔬 Testes unitários dos oráculos da ordenação (com o "Wood Saw" como regressão).
+- 📜 Resumir as mensagens de falha dos oráculos (o total e só os primeiros exemplos).
+- 🧰 Catálogo: pesquisa e filtros (comparar com o catálogo completo, percorrido à parte).
+- 🧪 Confirmar se os produtos `... - ref. MWP...` da base local são restos do projeto 2.
+- ☁️ CI no GitHub Actions.
