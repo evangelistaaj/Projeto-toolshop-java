@@ -91,30 +91,46 @@ Funcionalidade: Marcas
   Quero consultar as marcas disponíveis
   Para encontrar os produtos da marca que prefiro
 
-  Regra: Só se consultam marcas que existem
-    A lista de marcas está aberta a todos.
-    Pedir uma marca que não existe devolve "não encontrado".
+  Cenário: Listar todas as marcas
+    Quando peço a lista de marcas
+    Então recebo uma resposta com o código 200
 
-    Cenário: Listar todas as marcas
-      Quando peço a lista de marcas
-      Então a resposta tem o status 200
+  Regra: Cada marca consulta-se pelo seu id
+  Pedir uma marca que existe devolve essa marca. Pedir uma marca
+  que não existe devolve "não encontrado" (404).
+
+    Cenário: Pedir uma marca que existe
+      Quando peço uma marca da lista pelo seu id
+      Então recebo essa marca, com o mesmo id, nome e slug
 
     Cenário: Pedir uma marca que não existe
       Quando peço a marca com o id "marca-que-nao-existe"
-      Então a resposta tem o status 404
+      Então recebo uma resposta com o código 404
 ```
 
-E o "dicionário" que liga o português ao Java:
+E o "dicionário" que liga o português ao Java. O `Quando` escolhe uma marca da lista (os ids mudam de ambiente para ambiente) e deixa-a no `Contexto`, partilhado entre as classes de passos; o `Então` confirma que veio **essa** marca:
 
 ```java
-@Quando("peço a marca com o id {string}")
-public void pecoAMarcaComOId(String id) {
-    resposta = given().when().get("/brands/" + id);
+@Quando("peço uma marca da lista pelo seu id")
+public void pecoUmaMarcaDaListaPeloSeuId() {
+    Response lista = given().when().get("/brands")
+            .then().statusCode(200)
+            .extract().response();
+
+    contexto.idDaMarca = lista.path("id[0]");
+    contexto.nomeDaMarca = lista.path("name[0]");
+    contexto.slugDaMarca = lista.path("slug[0]");
+
+    contexto.resposta = given().when().get("/brands/" + contexto.idDaMarca);
 }
 
-@Então("a resposta tem o status {int}")
-public void aRespostaTemOStatus(int statusEsperado) {
-    resposta.then().statusCode(statusEsperado);
+@Então("recebo essa marca, com o mesmo id, nome e slug")
+public void receboEssaMarca() {
+    contexto.resposta.then()
+            .statusCode(200)
+            .body("id", equalTo(contexto.idDaMarca))
+            .body("name", equalTo(contexto.nomeDaMarca))
+            .body("slug", equalTo(contexto.slugDaMarca));
 }
 ```
 
@@ -124,7 +140,7 @@ public void aRespostaTemOStatus(int statusEsperado) {
 
 | Funcionalidade | Cenários | Estado |
 |---|---|---|
-| 🏷️ Marcas | 2 | ✅ a passar |
+| 🏷️ Marcas | 3 | ✅ a passar |
 | 🧰 Catálogo | 3 + 4 🐞 | ✅ a passar; 4 exemplos confirmam o bug [#28](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/28) |
 
 🚧 Projeto em construção: os cenários do [projeto 2](https://github.com/evangelistaaj/Projeto-toolshop-api) vão chegar aqui, funcionalidade a funcionalidade.
@@ -135,6 +151,7 @@ public void aRespostaTemOStatus(int statusEsperado) {
 
 - **Marcas**
   - ✅ A lista de marcas responde com status **200**.
+  - ✅ Pedir uma marca que existe devolve **essa** marca (mesmo `id`, `name` e `slug`). A marca é escolhida da própria lista, porque os ids mudam de ambiente para ambiente (a mesma marca tem ids diferentes no público e no Docker).
   - ✅ Pedir uma marca que não existe responde com **404** (caso negativo).
 - **Catálogo**
   - ✅ A lista de produtos não vem vazia, e cada produto tem `id` e `name` (texto), `price` (número) e `in_stock` (verdadeiro/falso).
@@ -183,21 +200,33 @@ Os bugs só passam a *issue* depois de um teste os confirmar. Este projeto testa
 ```
 Projeto-toolshop-java/
 ├── .editorconfig                 # regras de escrita do editor (LF, indentação)
-├── .gitattributes                # o Git guarda sempre com LF
+├── .gitattributes                # o Git guarda com LF (exceto os .cmd, em CRLF)
 ├── .gitignore
+├── .mvn/wrapper/                 # configuração do Maven Wrapper
+├── mvnw / mvnw.cmd               # Maven Wrapper (Linux e macOS / Windows)
 ├── DIARIO.md                     # diário de bordo da aprendizagem
 ├── LICENSE
 ├── README.md
 ├── pom.xml                       # dependências (Maven)
+├── docs/
+│   ├── cabula-steps.md           # como pensar ao escrever um Quando / Então
+│   └── comparacao-typescript-java.md   # o que muda do projeto 2 para o 3, e porquê
 └── src/test/
     ├── java/io/github/evangelistaaj/
-    │   ├── ExecutarCucumberTest.java   # runner: liga o Cucumber ao JUnit
-    │   └── steps/
-    │       └── MarcasSteps.java        # passos (o "dicionário" português → Java)
+    │   ├── ExecutarCucumberTest.java     # runner normal (sem os @bug-conhecido)
+    │   ├── ExecutarBugsConhecidos.java   # runner dos bugs conhecidos
+    │   ├── steps/
+    │   │   ├── Hooks.java                # @Before: o endereço da API (TOOLSHOP_API_URL)
+    │   │   ├── ComumSteps.java           # passos comuns (o código da resposta)
+    │   │   ├── MarcasSteps.java
+    │   │   └── CatalogoSteps.java
+    │   └── support/
+    │       └── Contexto.java             # o "balcão" partilhado entre os passos (PicoContainer)
     └── resources/
-        ├── cucumber.properties         # onde estão os passos (glue)
+        ├── cucumber.properties           # onde estão os passos (quando se corre pelo .feature)
         └── features/
-            └── marcas.feature          # cenários em Gherkin
+            ├── marcas.feature
+            └── catalogo.feature
 ```
 
 ---
