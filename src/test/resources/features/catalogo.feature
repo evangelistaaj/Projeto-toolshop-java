@@ -21,3 +21,33 @@ Funcionalidade: Catálogo de produtos
     Cenário: Uma página depois da última vem vazia
       Quando consulto a página a seguir à última do catálogo
       Então a página vem vazia
+
+
+  Regra: Um número de página que não é válido é recusado
+  O Swagger define a página como um número inteiro, sem dizer a partir de
+  que número, e não documenta o 422 no GET /products. Esperamos 422 porque
+  é a resposta que a própria API documenta noutras 28 operações para um
+  conteúdo que não consegue processar, incluindo um GET (/postcode-lookup,
+  que responde 422 a um código postal inválido). Nunca 200 com outra página.
+
+    Esquema do Cenário: Uma página com <problema> é recusada
+      Quando consulto "<endereço>" com "<parâmetros>"
+      Então recebo uma resposta com o código 422
+
+      @bug-conhecido @issue-28
+      Exemplos: Abaixo do limite
+      Bug: os parâmetros do catálogo não são validados; o pedido é aceite com 200.
+      https://github.com/evangelistaaj/Projeto-toolshop-api/issues/28
+
+        | problema           | endereço  | parâmetros |
+        | o número zero      | /products | page=0     |
+        | um número negativo | /products | page=-1    |
+
+      @bug-conhecido @issue-28
+      Exemplos: Não é um número inteiro
+      Bug: os parâmetros do catálogo não são validados; o pedido é aceite com 200.
+      https://github.com/evangelistaaj/Projeto-toolshop-api/issues/28
+
+        | problema          | endereço  | parâmetros |
+        | letras            | /products | page=abc   |
+        | um número decimal | /products | page=1.5   |

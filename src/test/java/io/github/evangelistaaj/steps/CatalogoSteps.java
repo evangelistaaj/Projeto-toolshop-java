@@ -65,4 +65,9 @@ public class CatalogoSteps {
             .body("from", nullValue())
             .body("to", nullValue());
     }
+
+    @Quando("consulto {string} com {string}")
+    public void consultoCom(String endereco, String parametros) {
+        contexto.resposta = given().when().get(endereco + "?" + parametros);
+    }
 }

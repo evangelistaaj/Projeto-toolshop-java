@@ -59,6 +59,17 @@ E, desta vez, **o código é escrito por mim, linha a linha**. 💪
      ./mvnw test          # Linux e macOS
      ```
 
+### 🐞 Dois perfis: normal e bugs conhecidos
+
+Os cenários de bugs já confirmados têm a tag `@bug-conhecido` e falham **de propósito**: o esperado é o comportamento certo, e não o que a API faz hoje.
+
+| Perfil | Runner | Comando | Resultado esperado |
+|---|---|---|---|
+| 🟢 Normal | `ExecutarCucumberTest` (`@ExcludeTags("bug-conhecido")`) | `.\mvnw.cmd test` | tudo verde |
+| 🐞 Bugs conhecidos | `ExecutarBugsConhecidos` (`@IncludeTags("bug-conhecido")`) | `.\mvnw.cmd test -Dtest=ExecutarBugsConhecidos` | falham enquanto o bug existir |
+
+O runner dos bugs não acaba em `Test`, por isso o `mvnw test` normal não o corre. Se um dia a Toolshop corrigir um bug, o cenário fica verde no perfil dos bugs, e é sinal para tirar a tag.
+
 ### 🐳 Onde correm os testes
 
 Por omissão, os testes correm contra a **Toolshop local** (`http://localhost:8091`). Para usar outro endereço, sem mexer no código, define a variável de ambiente `TOOLSHOP_API_URL`:
@@ -114,6 +125,7 @@ public void aRespostaTemOStatus(int statusEsperado) {
 | Funcionalidade | Cenários | Estado |
 |---|---|---|
 | 🏷️ Marcas | 2 | ✅ a passar |
+| 🧰 Catálogo | 3 + 4 🐞 | ✅ a passar; 4 exemplos confirmam o bug [#28](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/28) |
 
 🚧 Projeto em construção: os cenários do [projeto 2](https://github.com/evangelistaaj/Projeto-toolshop-api) vão chegar aqui, funcionalidade a funcionalidade.
 
@@ -124,6 +136,11 @@ public void aRespostaTemOStatus(int statusEsperado) {
 - **Marcas**
   - ✅ A lista de marcas responde com status **200**.
   - ✅ Pedir uma marca que não existe responde com **404** (caso negativo).
+- **Catálogo**
+  - ✅ A lista de produtos não vem vazia, e cada produto tem `id` e `name` (texto), `price` (número) e `in_stock` (verdadeiro/falso).
+  - ✅ A página 2 tem 9 produtos, do 10.º ao 18.º (página, produtos por página, tamanho da lista e posição).
+  - ✅ A página a seguir à última vem vazia, sem posição (`from` e `to` a `null`). A última página é lida da própria resposta, porque muda de ambiente para ambiente.
+  - 🐞 Uma página inválida (**valores-limite** `0` e `-1`; **não inteiros** `abc` e `1.5`) devia ser recusada com **422**. Hoje a API devolve **200 com a página 1**, em silêncio.
 
 ---
 
@@ -143,12 +160,18 @@ public void aRespostaTemOStatus(int statusEsperado) {
 
 ## 🐞 Bugs encontrados
 
-Ainda nenhum confirmado neste projeto. Os bugs só passam a *issue* depois de um teste os confirmar.
+Os bugs só passam a *issue* depois de um teste os confirmar. Este projeto testa a mesma Toolshop do [projeto 2](https://github.com/evangelistaaj/Projeto-toolshop-api), por isso os bugs já conhecidos apontam para os issues de lá.
+
+| Issue | Bug | Confirmado aqui |
+|---|---|---|
+| [#28](https://github.com/evangelistaaj/Projeto-toolshop-api/issues/28) | Os parâmetros do catálogo não são validados: um pedido inválido é aceite com 200 | ✅ caso novo: o `page` (`0`, `-1`, `abc`, `1.5`) devolve a página 1, em vez de 422 |
 
 ---
 
 ## 💡 Descobertas
 
+- 📄 **O 422 está no Swagger, mas não no `GET /products`:** a documentação define o 422 (`UnprocessableEntityResponse`, "the server was not able to process the content") em **28 das 88 operações**, incluindo um GET (`/postcode-lookup`, que responde mesmo 422 a um código postal inválido). O `GET /products` só documenta 200, 404 e 405, e o `page` é um inteiro sem mínimo definido. O esperado dos cenários da página inválida vem desta consistência, e está escrito na descrição da Regra.
+- 🔀 **A causa do Swagger local que falava com o público:** a lista `servers` da especificação tem o endereço público **em primeiro lugar**, e o Swagger usa o primeiro por omissão.
 - 🌍 **O ambiente público muda enquanto o exploras:** no Swagger, o `GET /products` devolveu `total` 50, depois 141 e depois 150, em poucos minutos (outras pessoas a criar produtos). Por isso os cenários nunca têm totais escritos à mão e correm, por omissão, na Toolshop local.
 - 🔀 **O Swagger da Toolshop local envia os pedidos para o servidor público:** aberto em `localhost:8091`, o *Try it out* usa por omissão `api.practicesoftwaretesting.com`. Para falar com o Docker, é preciso escolher o servidor local na lista *Servers*, no topo da página. Só se dá por isso lendo o *Request URL*.
 - 🛡️ **Dependência vulnerável "escondida":** o REST Assured 6.3.0 traz consigo, como dependência transitiva, o `commons-codec 1.11`, que tem uma vulnerabilidade conhecida (WS-2019-0379). A versão 1.22.1 também tinha avisos (CVE-2026-119078 e CVE-2026-124077). A solução foi **forçar o `commons-codec 1.23.0`** no `dependencyManagement` do `pom.xml`, e os avisos desapareceram.
