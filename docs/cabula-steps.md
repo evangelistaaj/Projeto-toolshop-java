@@ -78,6 +78,23 @@ public void pecoUmaMarcaDaListaPeloSeuId() {
 
 ---
 
+## 🔬 Testar uma função de oráculo (testes unitários)
+
+```java
+class OraculosTest {                                   // o nome acaba em Test → o mvnw test corre-o
+    @Test
+    @DisplayName("Um elemento repetido é encontrado")  // o nome legível, em português
+    void umElementoRepetido() {
+        assertThat(Oraculos.repetidos(List.of("A", "B", "A")), contains("A"));
+    }
+}
+```
+- `List.of("A", "B")` cria uma lista já com valores (dados inventados).
+- `contains("A")` = "tem **exatamente** isto"; `hasItem("A")` = "tem isto, e talvez mais".
+- ⚖️ Sempre **dois tipos**: um **caso que tem de apanhar** (há repetidos → encontra-os) e um **controlo que tem de deixar passar** (não há → não inventa). Uma balança que diz sempre "zero" passa nos controlos; só os casos a apanham.
+
+---
+
 ## 🗺️ Caminhos dentro do JSON (o 1.º argumento do `.body(...)` e do `.path(...)`)
 
 | Caminho | Dá... |

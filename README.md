@@ -65,9 +65,9 @@ E, desta vez, **o código é escrito por mim, linha a linha**. 💪
 
 Os cenários de bugs já confirmados têm a tag `@bug-conhecido` e falham **de propósito**: o esperado é o comportamento certo, e não o que a API faz hoje.
 
-| Perfil | Runner | Comando | Resultado esperado |
+| Perfil | O que corre | Comando | Resultado esperado |
 |---|---|---|---|
-| 🟢 Normal | `ExecutarCucumberTest` (`@ExcludeTags("bug-conhecido")`) | `.\mvnw.cmd test` | tudo verde |
+| 🟢 Normal | `ExecutarCucumberTest` (`@ExcludeTags("bug-conhecido")`) e os testes unitários | `.\mvnw.cmd test` | tudo verde |
 | 🐞 Bugs conhecidos | `ExecutarBugsConhecidos` (`@IncludeTags("bug-conhecido")`) | `.\mvnw.cmd test -Dtest=ExecutarBugsConhecidos` | falham enquanto o bug existir |
 
 O runner dos bugs não acaba em `Test`, por isso o `mvnw test` normal não o corre. Se um dia a Toolshop corrigir um bug, o cenário fica verde no perfil dos bugs, e é sinal para tirar a tag.
@@ -172,6 +172,7 @@ public void receboEssaMarca() {
   - **Sabotagem**: altero o código de propósito para o teste ficar vermelho, e depois desfaço. Se a sabotagem não for apanhada, o teste não está a verificar nada.
 - **Desconfiar dos verdes:** um teste pode passar pela razão errada (*falso positivo*). Exemplo real deste projeto: um endereço mal escrito também devolvia 404, por isso o teste "da marca inexistente" passava sem testar marca nenhuma. A sabotagem e a revisão do código apanharam-no.
 - **O esperado vem sempre de fora do sistema:** do Swagger, da consistência com o resto da API e das normas HTTP, e nunca da própria resposta (um teste que concorda sempre com o sistema não testa nada). Quando a fonte é fraca, a descrição da Regra di-lo.
+- **Testar os testes:** as funções de oráculo (`support/Oraculos.java`) têm testes unitários com dados inventados (`unitarios/OraculosTest.java`), que correm em milissegundos no `mvnw test`. Cada função é posta à prova com **um caso que tem de apanhar** e **um controlo que tem de deixar passar**: com a sabotagem "devolve sempre vazio", os controlos continuavam verdes e só os casos a apanharam.
 - **Verificações que se complementam:** no catálogo completo, "recebi o total" e "nenhum repetido" juntas apanham o que cada uma sozinha deixaria passar.
 - **Explorar antes de automatizar:** cada funcionalidade começa no Swagger (local) ou no terminal, só com leituras, e só depois passa a cenário.
 - **Gherkin declarativo, em português:** um só `Quando` por cenário, `Regra:` com descrição e passos reutilizáveis com parâmetros (`{string}`, `{int}`).
@@ -226,6 +227,8 @@ Projeto-toolshop-java/
     │   │   ├── ComumSteps.java           # passos comuns (o código da resposta)
     │   │   ├── MarcasSteps.java
     │   │   └── CatalogoSteps.java
+    │   ├── unitarios/
+    │   │   └── OraculosTest.java         # testes unitários das funções de oráculo (JUnit puro)
     │   └── support/
     │       ├── Contexto.java             # o "balcão" partilhado entre os passos (PicoContainer)
     │       └── Oraculos.java             # funções de oráculo (ex.: repetidos)
@@ -248,7 +251,7 @@ Projeto-toolshop-java/
 - [x] Testes a correr na Toolshop local (Docker), com o endereço configurável (`TOOLSHOP_API_URL`)
 - [x] Correr os testes pela linha de comandos, com o Maven Wrapper (`mvnw test`)
 - [x] Dois perfis: normal e bugs conhecidos
-- [ ] Testes unitários das funções de oráculo
+- [x] Testes unitários das funções de oráculo (JUnit), com sabotagem
 - [ ] Catálogo: pesquisa, filtros e ordenação
 - [ ] Trazer as restantes funcionalidades do projeto 2 (produtos, categorias, utilizadores, login…)
 - [ ] Massa de teste em JSON (`dados/`)
